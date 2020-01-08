@@ -1,68 +1,38 @@
 # ReverseCAKE
 Code for generating reverse de Bruijn sequences
-package reverse;
-import gurobi.GRBException;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 
-import gurobi.GRBException;
+ReverseCAKE - Reverse de Bruijn Sequence to Cover All K-mers
 
-public class reverseDeBruijn {
-	
-	public static void main(String []argv) throws GRBException {
-		
-		// Check if enough arguments were given
-		if (argv.length != 4) {
-			System.out.println("usage: java -jar reverse.jar <k> <output_file> <alphabet> <time_limit>");
-			System.out.println("usage: if time limit is set to 0, no ILP is run");
-			// ACGT, ACDEFGHIKLMNPQRSTVWY
-			return;
-		}
-		
-		// Parse k from the input
-		int k = Integer.parseInt(argv[0]);
-		System.out.println("Going to create sequence for " + k + " ");
+ReverseCAKE (short for Reverse de Bruijn sequence to Cover All K-mErs) is a software for generating a shortest sequence that for each k-mer includes the k-mer or its reverse.
 
-		String alphabet = argv[2];
-		System.out.println("alphabet = " + alphabet);
-		// Create a new reverse-de-bruijn graph
-		Graph g = new Graph(alphabet, k, false);
-		g.generateGraph(); 
-		
-		/// Augment graph and run Euler tour
-		g.augmentGraph(true);
-		System.out.println("After augmentation, total number of edges is " + g.numEdges());
-		String seq = g.findEuler(k);
-		// Add the first k-1 characters to cover all k-mers
-		seq += seq.substring(0,k-1);
-		
-		if (argv[3].compareTo("0") != 0) {
-			g = new Graph(alphabet, k, false);
-			g.generateGraph(); 
-			g.ILP(Integer.parseInt(argv[3]), seq);
-			seq = g.findEuler(k);
-			// Add the first k-1 characters to cover all k-mers
-			seq += seq.substring(0,k-1);
-		}
-		System.out.println("After augmentation, total number of edges is " + g.numEdges());
+Input and Output
 
-		// Write the result to a file
-		try{
-			FileWriter fstream = new FileWriter(argv[1]);
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write(seq);
-			out.close();
-		} catch (Exception e){//Catch exception if any
-			System.err.println("Error: " + e.getMessage());
-		}
-		
-		// Check the result is indeed reverse-de-bruijn
-		boolean semi = g.checkRev(seq, k);
+ReverseCAKE takes as input four parameters:
 
-		// Some output
-		System.out.println(seq.substring(0,Math.min(seq.length(),20)) + "..." + 
-				seq.substring(seq.length()-Math.min(seq.length(),20))+ "\n" +
-				"Checked and the sequence is reverse-de-Bruijn: " + semi + "\n" +
-				"Its length: " + (seq.length()-(k-1)));
-	}
-}
+k - the order of the sequence.
+The alphabets.
+The output file name.
+ILP time limit - if 0, not ILP is run. Need Gurobi library set up to run.
+It outputs the sequence as a textual file.
+
+ReverseCAKE was developed by Yaron Orenstein at Ben-Gurion University.
+
+Get the software
+
+Java executable distribution and example files This distribution is our officially supported executable for ReverseCAKE. This binary is completely self-contained and should work out of the box without any issues.
+
+The software is freely available under the GNU Lesser General Public License, version 3, or any later version at your choice.
+
+ReverseCAKE is a research software, still in the development stage. Hence, it is not presented as error-free, accurate, complete, useful, suitable for any specific application or free from any infringement of any rights. The Software is licensed AS IS, entirely at the user's own risk.
+
+How to use it
+
+java -jar reverse.jar <output_filename>
+
+Example runs:
+
+java -jar reverse.jar 8 sequence8.txt ACGT 0
+
+Interpreting the output
+
+The output file is a text file containing the sequence.
